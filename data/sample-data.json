@@ -1,0 +1,78 @@
+{
+  "events": {
+    "PUMP-L1-H01": [
+      { "timestamp": "2026-01-16T06:15:00Z", "type": "pressure", "value": 2450, "unit": "PSI", "message": "Hydraulic pressure within normal range" },
+      { "timestamp": "2026-01-16T08:30:00Z", "type": "vibration", "value": 4.8, "unit": "mm/s", "message": "Vibration increasing on pump bearing" },
+      { "timestamp": "2026-01-16T09:45:00Z", "type": "vibration", "value": 7.2, "unit": "mm/s", "message": "Vibration spike detected - above warning threshold" },
+      { "timestamp": "2026-01-16T10:20:00Z", "type": "temperature", "value": 68, "unit": "°C", "message": "Oil temperature elevated" }
+    ],
+    "CNC-L1-M01": [
+      { "timestamp": "2026-01-16T06:00:00Z", "type": "spindle_speed", "value": 8000, "unit": "RPM", "message": "Spindle at nominal speed" },
+      { "timestamp": "2026-01-16T07:30:00Z", "type": "temperature", "value": 45, "unit": "°C", "message": "Spindle bearing temperature normal" },
+      { "timestamp": "2026-01-16T09:00:00Z", "type": "tool_wear", "value": 78, "unit": "%", "message": "Tool wear approaching limit" }
+    ],
+    "CNC-L2-M03": [
+      { "timestamp": "2026-01-16T06:10:00Z", "type": "temperature", "value": 52, "unit": "°C", "message": "Machine warming up" },
+      { "timestamp": "2026-01-16T08:45:00Z", "type": "temperature", "value": 78, "unit": "°C", "message": "Temperature above normal operating range" },
+      { "timestamp": "2026-01-16T10:15:00Z", "type": "temperature", "value": 92, "unit": "°C", "message": "CRITICAL: Sustained high temperature - coolant issue suspected" },
+      { "timestamp": "2026-01-16T10:20:00Z", "type": "throughput", "value": 72, "unit": "%", "message": "Throughput 28% below target due to thermal throttling" }
+    ],
+    "CONV-L1-B02": [
+      { "timestamp": "2026-01-16T06:00:00Z", "type": "speed", "value": 1.2, "unit": "m/s", "message": "Conveyor speed nominal" },
+      { "timestamp": "2026-01-16T08:00:00Z", "type": "motor_current", "value": 12.5, "unit": "A", "message": "Motor current within spec" },
+      { "timestamp": "2026-01-16T11:30:00Z", "type": "belt_tension", "value": 85, "unit": "%", "message": "Belt tension slightly low" }
+    ],
+    "COMP-AUX-01": [
+      { "timestamp": "2026-01-16T06:00:00Z", "type": "pressure", "value": 125, "unit": "PSI", "message": "System pressure nominal" },
+      { "timestamp": "2026-01-16T09:00:00Z", "type": "temperature", "value": 82, "unit": "°C", "message": "Discharge temperature normal" },
+      { "timestamp": "2026-01-16T12:00:00Z", "type": "oil_level", "value": 68, "unit": "%", "message": "Oil level decreasing - check for leaks" }
+    ],
+    "PLC-L2-MAIN": [
+      { "timestamp": "2026-01-16T06:00:00Z", "type": "cpu_load", "value": 35, "unit": "%", "message": "PLC CPU utilization normal" },
+      { "timestamp": "2026-01-16T08:00:00Z", "type": "scan_time", "value": 12, "unit": "ms", "message": "Scan cycle time within limits" },
+      { "timestamp": "2026-01-16T10:30:00Z", "type": "io_errors", "value": 3, "unit": "count", "message": "Minor I/O communication errors on rack 2" }
+    ]
+  },
+  "maintenanceLogs": [
+    { 
+      "id": "WO-2026-0142", 
+      "assetId": "PUMP-L1-H01", 
+      "timestamp": "2026-01-16T10:00:00Z", 
+      "note": "Grinding noise from hydraulic pump during startup sequence. Noise increases under load. Vibration sensor showing intermittent spikes above threshold.",
+      "operator": "J. Martinez",
+      "shift": "B"
+    },
+    { 
+      "id": "WO-2026-0143", 
+      "assetId": "CNC-L2-M03", 
+      "timestamp": "2026-01-16T10:30:00Z", 
+      "note": "Machine running hot for 2+ hours. Coolant flow appears reduced. Automatic thermal throttling engaged. Parts queue backing up.",
+      "operator": "R. Chen",
+      "shift": "B"
+    },
+    { 
+      "id": "WO-2026-0144", 
+      "assetId": "CNC-L1-M01", 
+      "timestamp": "2026-01-16T11:15:00Z", 
+      "note": "Tool wear sensor triggered. Recommend tool change before next batch. Surface finish on last 3 parts below spec.",
+      "operator": "A. Patel",
+      "shift": "B"
+    },
+    { 
+      "id": "WO-2026-0145", 
+      "assetId": "CONV-L1-B02", 
+      "timestamp": "2026-01-16T12:00:00Z", 
+      "note": "Belt tracking slightly off center. Adjusted idler roller. Monitor for recurrence.",
+      "operator": "J. Martinez",
+      "shift": "B"
+    },
+    { 
+      "id": "WO-2026-0146", 
+      "assetId": "COMP-AUX-01", 
+      "timestamp": "2026-01-16T12:45:00Z", 
+      "note": "Oil level dropping faster than expected. Visual inspection shows possible seal weep on discharge side. Scheduled for PM during next planned downtime.",
+      "operator": "M. Johnson",
+      "shift": "B"
+    }
+  ]
+}

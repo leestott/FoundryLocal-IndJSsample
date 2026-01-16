@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plant Asset Intelligence Dashboard</title>
+  <style>
+    :root {
+      --bg: #0a0f1a;
+      --panel: #0f1724;
+      --card: #141d2b;
+      --text: #e8f0fc;
+      --muted: #8a9bb8;
+      --accent: #00a6ff;
+      --accent-2: #00d68f;
+      --danger: #ff5a5a;
+      --warning: #ffb800;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --border: rgba(255, 255, 255, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #0a0f1a 0%, #0f1724 100%);
+      color: var(--text);
+      font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      background: rgba(15, 23, 36, 0.95);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+
+    .logo-section { display: flex; align-items: center; gap: 16px; }
+    .logo-icon {
+      width: 42px; height: 42px;
+      background: linear-gradient(135deg, var(--accent), #0066cc);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    h1 { margin: 0; font-size: 22px; font-weight: 600; }
+    .subtitle { color: var(--muted); font-size: 13px; margin-top: 2px; }
+
+    .header-status { display: flex; align-items: center; gap: 16px; }
+    .status-indicator {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 14px;
+      background: rgba(0, 214, 143, 0.1);
+      border: 1px solid rgba(0, 214, 143, 0.3);
+      border-radius: 20px;
+      font-size: 13px;
+    }
+    .status-indicator.offline {
+      background: rgba(255, 90, 90, 0.1);
+      border-color: rgba(255, 90, 90, 0.3);
+    }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent-2);
+      animation: pulse 2s infinite;
+    }
+    .status-indicator.offline .status-dot { background: var(--danger); animation: none; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 4px;
+      padding: 0 32px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-tab {
+      padding: 14px 20px;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .nav-tab:hover { color: var(--text); }
+    .nav-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    main { padding: 24px 32px 60px; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 20px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .card h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card h2 .icon { font-size: 18px; }
+    .card-badge {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      background: rgba(0, 166, 255, 0.15);
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    label {
+      font-size: 12px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.3);
+      color: var(--text);
+      padding: 12px 14px;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    button {
+      width: 100%;
+      border-radius: 8px;
+      border: none;
+      background: linear-gradient(135deg, var(--accent), #0077cc);
+      color: white;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: transform 0.1s, box-shadow 0.2s;
+    }
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 166, 255, 0.3);
+    }
+    button:active { transform: translateY(0); }
+
+    button.secondary {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      margin-top: 0;
+    }
+    button.secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      box-shadow: none;
+    }
+
+    button.danger { background: linear-gradient(135deg, var(--danger), #cc3333); }
+
+    pre {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      overflow: auto;
+      max-height: 200px;
+      margin: 12px 0 0 0;
+      border: 1px solid var(--border);
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(255,255,255,0.08);
+    }
+    .pill.low { background: rgba(0, 214, 143, 0.15); color: var(--accent-2); }
+    .pill.medium { background: rgba(255, 184, 0, 0.15); color: var(--warning); }
+    .pill.high { background: rgba(255, 90, 90, 0.15); color: var(--danger); }
+    .pill.critical { background: rgba(255, 90, 90, 0.25); color: #ff3333; }
+
+    .risk-display {
+      margin-top: 16px;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .chat-window {
+      height: 280px;
+      overflow-y: auto;
+      padding: 14px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      border: 1px solid var(--border);
+    }
+    .chat-bubble {
+      padding: 12px 14px;
+      border-radius: 12px;
+      max-width: 85%;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .chat-bubble.user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, var(--accent), #0077cc);
+      color: white;
+    }
+    .chat-bubble.bot {
+      align-self: flex-start;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+    tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+    .asset-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .asset-btn {
+      padding: 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      margin: 0;
+    }
+    .asset-btn:hover {
+      background: rgba(0, 166, 255, 0.1);
+      border-color: var(--accent);
+      transform: none;
+      box-shadow: none;
+    }
+    .asset-btn.selected {
+      background: rgba(0, 166, 255, 0.15);
+      border-color: var(--accent);
+    }
+    .asset-btn .asset-name { font-weight: 600; font-size: 14px; }
+    .asset-btn .asset-type { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    .scenario-card {
+      background: linear-gradient(135deg, rgba(255, 184, 0, 0.1), rgba(255, 90, 90, 0.1));
+      border-color: rgba(255, 184, 0, 0.3);
+    }
+    .scenario-card h2 { color: var(--warning); }
+
+    .btn-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .info-box {
+      background: rgba(0, 166, 255, 0.1);
+      border: 1px solid rgba(0, 166, 255, 0.2);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .info-box.warning {
+      background: rgba(255, 184, 0, 0.1);
+      border-color: rgba(255, 184, 0, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo-section">
+      <div class="logo-icon">🏭</div>
+      <div>
+        <h1>Plant Asset Intelligence</h1>
+        <div class="subtitle">On-Premises AI • Foundry Local • Real-Time Insights</div>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="status-indicator" id="statusIndicator">
+        <div class="status-dot"></div>
+        <span id="health">Connecting...</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="nav-tabs">
+    <div class="nav-tab active" data-tab="overview">📊 Overview</div>
+    <div class="nav-tab" data-tab="assets">⚙️ Asset Health</div>
+    <div class="nav-tab" data-tab="maintenance">🔧 Maintenance</div>
+    <div class="nav-tab" data-tab="chat">💬 AI Assistant</div>
+    <div class="nav-tab" data-tab="system">🖥️ System</div>
+  </nav>
+
+  <main>
+    <!-- OVERVIEW TAB -->
+    <div class="tab-content active" id="tab-overview">
+      <div class="section-title">🏭 Production Floor Overview</div>
+      <div class="grid-3">
+        <div class="card scenario-card">
+          <div class="card-header">
+            <h2><span class="icon">⚠️</span> Active Scenario</h2>
+            <span class="card-badge">SHIFT B</span>
+          </div>
+          <div class="info-box warning">
+            <strong>Scenario: Thermal Event on Assembly Line 2</strong><br><br>
+            • <strong>CNC-L2-M03</strong> (CNC Machining Center) showing sustained high temperature at 92°C<br>
+            • <strong>PUMP-L1-H01</strong> (Hydraulic Pump) reports grinding noise and vibration anomaly<br>
+            • Throughput on Line 2 is 28% below target
+          </div>
+          <button id="applyScenario">🎯 Load Scenario Inputs</button>
+          <pre id="scenarioSteps">Recommended Actions:
+1) Check thermal summary for CNC-L2-M03
+2) Classify hydraulic pump noise note
+3) Ask AI: "What caused the throughput drop?"</pre>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2><span class="icon">📋</span> Recent Maintenance Logs</h2>
+            <span class="card-badge">LIVE FEED</span>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Time</th><th>Equipment</th><th>Note</th></tr>
+            </thead>
+            <tbody id="logTable"></tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2><span class="icon">📈</span> Quick Stats</h2>
+          </div>
+          <div style="display: grid; gap: 12px;">
+            <div style="display: flex; justify-content: space-between; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px;">
+              <span>Total Assets Monitored</span>
+              <strong id="totalAssets">--</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px;">
+              <span>Open Maintenance Items</span>
+              <strong id="openMaintenance">--</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px;">
+              <span>AI Model Status</span>
+              <strong style="color: var(--accent-2);" id="modelStatus">--</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ASSETS TAB -->
+    <div class="tab-content" id="tab-assets">
+      <div class="section-title">⚙️ Asset Health Analysis</div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <h2><span class="icon">🔍</span> Select Equipment</h2>
+          </div>
+          <div class="asset-selector" id="assetSelector"></div>
+          <label for="assetId">Or enter Asset ID manually</label>
+          <input id="assetId" value="PUMP-L1-H01" placeholder="e.g., CNC-L2-M03" />
+          <button id="loadSummary">🤖 Generate AI Health Summary</button>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2><span class="icon">📊</span> Health Assessment</h2>
+          </div>
+          <div class="risk-display">
+            <span>Risk Level:</span>
+            <span id="riskPill" class="pill">Awaiting Analysis</span>
+          </div>
+          <pre id="summary">Select an asset and click "Generate AI Health Summary" to analyze recent sensor data, events, and maintenance history.
+
+The AI will provide:
+• Overall health assessment
+• Key incidents from the last 24 hours
+• Risk classification (LOW / MEDIUM / HIGH / CRITICAL)
+• Recommended actions</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAINTENANCE TAB -->
+    <div class="tab-content" id="tab-maintenance">
+      <div class="section-title">🔧 Maintenance Triage</div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <h2><span class="icon">📝</span> Classify Operator Note</h2>
+          </div>
+          <div class="info-box">
+            Enter a maintenance observation from an operator shift report. The AI will classify priority and recommend next steps.
+          </div>
+          <label for="maintenanceNote">Operator Observation / Note</label>
+          <textarea id="maintenanceNote" rows="5" placeholder="Describe the issue observed...">Grinding noise from hydraulic pump during startup sequence. Noise increases under load. Vibration sensor showing intermittent spikes above threshold.</textarea>
+          <button id="classifyNote">🎯 Classify Priority & Recommend Action</button>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2><span class="icon">⚡</span> AI Classification Result</h2>
+          </div>
+          <div id="classification" style="margin-bottom: 12px;">
+            <div class="pill">Priority: Pending</div>
+          </div>
+          <pre id="classificationDetails">Submit an operator note to receive:
+
+• Priority Classification:
+  - LOW: Monitor during regular rounds
+  - MEDIUM: Schedule for next planned downtime
+  - HIGH: Address within current shift
+  - CRITICAL: Immediate action required
+
+• Recommended Action
+• Rationale for classification</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHAT TAB -->
+    <div class="tab-content" id="tab-chat">
+      <div class="section-title">💬 AI Engineering Assistant</div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <h2><span class="icon">🤖</span> Ask the AI</h2>
+          </div>
+          <div class="info-box">
+            Query the AI about equipment status, recent incidents, maintenance history, or ask for recommendations. The AI has context from sensor data and maintenance logs.
+          </div>
+          <label for="chatAsset">Context Equipment (optional)</label>
+          <input id="chatAsset" placeholder="e.g., PUMP-L1-H01 or leave blank for plant-wide" />
+          <div class="chat-window" id="chatWindow">
+            <div class="chat-bubble bot">Hello! I'm your plant AI assistant. Ask me about equipment health, recent incidents, maintenance recommendations, or failure patterns. I have access to sensor data and maintenance logs for all monitored assets.</div>
+          </div>
+          <label for="chatInput" style="margin-top: 12px;">Your Question</label>
+          <input id="chatInput" placeholder="e.g., What caused the temperature spike on Line 2?" />
+          <button id="sendChat">📤 Send Question</button>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2><span class="icon">💡</span> Example Questions</h2>
+          </div>
+          <div style="display: grid; gap: 8px;">
+            <button class="secondary example-q" data-q="What incidents occurred on Line 1 in the last 24 hours?">📊 What incidents on Line 1 today?</button>
+            <button class="secondary example-q" data-q="Which equipment has the highest risk level currently?">⚠️ Which equipment is highest risk?</button>
+            <button class="secondary example-q" data-q="What is the recommended maintenance schedule for the hydraulic pumps?">🔧 Pump maintenance schedule?</button>
+            <button class="secondary example-q" data-q="Explain the relationship between vibration spikes and bearing failure patterns.">📈 Vibration vs bearing failure?</button>
+            <button class="secondary example-q" data-q="Summarize all thermal anomalies this shift.">🌡️ Thermal anomalies this shift?</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SYSTEM TAB -->
+    <div class="tab-content" id="tab-system">
+      <div class="section-title">🖥️ System Administration</div>
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-header">
+            <h2><span class="icon">⚡</span> Active Model</h2>
+            <span class="card-badge">FOUNDRY LOCAL</span>
+          </div>
+          <div class="info-box" style="background: rgba(255,184,0,0.1); border-color: rgba(255,184,0,0.3);">
+            ⚠️ <strong>Important:</strong> Foundry Local can only load ONE model at a time per service. To switch models, use: <code style="background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px;">foundry model run [model-name]</code>
+          </div>
+          <label>Currently Loaded Model</label>
+          <div id="loadedModelDisplay" style="padding: 14px; background: rgba(0,166,255,0.1); border: 1px solid rgba(0,166,255,0.3); border-radius: 8px; text-align: center; font-weight: 600; font-size: 16px;">
+            Loading...
+          </div>
+          <label style="margin-top: 16px;">Preferred Model (for next restart)</label>
+          <select id="preferredModelSelect">
+            <option value="qwen2.5-0.5b">qwen2.5-0.5b (0.5GB) ⚡⚡⚡⚡⚡ Fastest</option>
+            <option value="qwen2.5-1.5b">qwen2.5-1.5b (1.25GB) ⚡⚡⚡⚡</option>
+            <option value="phi-3.5-mini">phi-3.5-mini (2.1GB) ⚡⚡⚡ Default</option>
+            <option value="phi-4-mini">phi-4-mini (3.6GB) ⚡⚡</option>
+            <option value="qwen2.5-7b">qwen2.5-7b (4.7GB) ⚡ Best Quality</option>
+          </select>
+          <button id="applyModelConfig">💾 Save Preference</button>
+          <button class="secondary" id="refreshModelConfig" style="margin-top: 8px;">🔄 Refresh Status</button>
+          <pre id="modelConfigStatus">Click "Refresh Status" to see the loaded model.
+
+To switch models, run in terminal:
+  foundry model run qwen2.5-0.5b
+
+Then restart this application.</pre>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2><span class="icon">⏱️</span> Inference Timing</h2>
+            <span class="card-badge">BENCHMARK</span>
+          </div>
+          <div style="display: grid; gap: 12px;">
+            <div style="display: flex; justify-content: space-between; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 8px;">
+              <span>Last Classification</span>
+              <strong id="lastClassifyTime" style="color: var(--accent);">-- ms</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 8px;">
+              <span>Last Summary</span>
+              <strong id="lastSummaryTime" style="color: var(--accent);">-- ms</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 8px;">
+              <span>Last Chat Response</span>
+              <strong id="lastChatTime" style="color: var(--accent);">-- ms</strong>
+            </div>
+          </div>
+          <button class="secondary" id="runBenchmark" style="margin-top: 12px;">🏃 Run Quick Benchmark</button>
+          <pre id="benchmarkResults">Run a benchmark to compare model speeds.
+
+This will execute:
+• 1 classification task
+• 1 summary generation
+• 1 chat query</pre>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2><span class="icon">🧠</span> Foundry Local Models</h2>
+          </div>
+          <div class="btn-grid" style="margin-bottom: 12px;">
+            <button class="secondary" id="loadCatalog">📚 Model Catalog</button>
+            <button class="secondary" id="loadCached">💾 Cached Models</button>
+          </div>
+          <button class="secondary" id="checkStatus">🔍 Check Service Status</button>
+          <pre id="modelListing">Click a button above to view model information.
+
+Foundry Local provides on-premises AI inference using ONNX Runtime acceleration.</pre>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2><span class="icon">💬</span> Conversation History</h2>
+          </div>
+          <button class="secondary" id="refreshConversations" style="margin-bottom: 10px;">🔄 Refresh</button>
+          <label for="conversationSelect">Select Conversation</label>
+          <select id="conversationSelect">
+            <option value="">-- No conversations --</option>
+          </select>
+          <div class="btn-grid" style="margin-top: 12px;">
+            <button class="secondary" id="loadConversation">📖 Load</button>
+            <button class="secondary" id="deleteConversation">🗑️ Delete</button>
+          </div>
+          <button class="secondary danger" id="clearAllConversations" style="margin-top: 10px;">⚠️ Clear All History</button>
+          <pre id="conversationHistory">Select a conversation to view history.</pre>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2><span class="icon">ℹ️</span> About</h2>
+          </div>
+          <div style="font-size: 13px; line-height: 1.8; color: var(--muted);">
+            <p><strong style="color: var(--text);">Plant Asset Intelligence</strong></p>
+            <p>On-premises AI-powered asset monitoring and maintenance triage for manufacturing environments.</p>
+            <p>
+              <strong>Features:</strong><br>
+              • AI health summaries from sensor data<br>
+              • Maintenance priority classification<br>
+              • Conversational engineering assistant<br>
+              • 100% on-premises inference
+            </p>
+            <p>
+              <strong>Powered by:</strong><br>
+              Microsoft Foundry Local<br>
+              foundry-local-sdk
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const apiBase = 'http://localhost:3000/api';
+
+    // Asset definitions for better UX
+    const assetInfo = {
+      'PUMP-L1-H01': { name: 'Hydraulic Pump #1', type: 'Line 1 • Hydraulic System', icon: '💧' },
+      'CNC-L1-M01': { name: 'CNC Lathe #1', type: 'Line 1 • Machining Center', icon: '⚙️' },
+      'CNC-L2-M03': { name: 'CNC Mill #3', type: 'Line 2 • Machining Center', icon: '🔩' },
+      'CONV-L1-B02': { name: 'Belt Conveyor #2', type: 'Line 1 • Material Handling', icon: '🏭' },
+      'COMP-AUX-01': { name: 'Air Compressor #1', type: 'Auxiliary • Pneumatics', icon: '💨' },
+      'PLC-L2-MAIN': { name: 'Main PLC', type: 'Line 2 • Control System', icon: '🖥️' },
+    };
+
+    // Tab navigation
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+      });
+    });
+
+    // Health check
+    async function checkHealth() {
+      const indicator = document.getElementById('statusIndicator');
+      const healthEl = document.getElementById('health');
+      try {
+        const res = await fetch(`${apiBase}/health`);
+        if (res.ok) {
+          healthEl.textContent = 'System Online';
+          indicator.classList.remove('offline');
+          document.getElementById('modelStatus').textContent = 'Active';
+        } else {
+          healthEl.textContent = 'Offline';
+          indicator.classList.add('offline');
+          document.getElementById('modelStatus').textContent = 'Offline';
+        }
+      } catch {
+        healthEl.textContent = 'Offline';
+        indicator.classList.add('offline');
+        document.getElementById('modelStatus').textContent = 'Offline';
+      }
+    }
+
+    // Populate asset selector
+    async function populateAssets() {
+      try {
+        const res = await fetch(`${apiBase}/assets`);
+        const data = await res.json();
+        const selector = document.getElementById('assetSelector');
+        selector.innerHTML = '';
+        
+        data.assets.forEach(assetId => {
+          const info = assetInfo[assetId] || { name: assetId, type: 'Unknown', icon: '📦' };
+          const btn = document.createElement('button');
+          btn.className = 'asset-btn';
+          btn.innerHTML = `<div class="asset-name">${info.icon} ${info.name}</div><div class="asset-type">${info.type}</div>`;
+          btn.onclick = () => {
+            document.querySelectorAll('.asset-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            document.getElementById('assetId').value = assetId;
+          };
+          selector.appendChild(btn);
+        });
+        
+        document.getElementById('totalAssets').textContent = data.assets.length;
+      } catch (e) {
+        console.error('Failed to load assets:', e);
+      }
+    }
+
+    function setRiskPill(risk) {
+      const pill = document.getElementById('riskPill');
+      pill.textContent = risk || 'Unknown';
+      pill.className = `pill ${String(risk || '').toLowerCase()}`;
+    }
+
+    async function loadSummary() {
+      const assetId = document.getElementById('assetId').value;
+      if (!assetId) return alert('Please select or enter an asset ID');
+      
+      document.getElementById('summary').textContent = 'Analyzing asset data...';
+      setRiskPill('Analyzing...');
+      
+      const startTime = performance.now();
+      try {
+        const res = await fetch(`${apiBase}/assets/${encodeURIComponent(assetId)}/summary`);
+        const data = await res.json();
+        lastSummaryTime = Math.round(performance.now() - startTime);
+        updateTimingDisplay();
+        document.getElementById('summary').textContent = `[Inference: ${lastSummaryTime} ms]\n\n` + JSON.stringify(data.summary, null, 2);
+        setRiskPill(data.summary?.riskLevel || 'Unknown');
+      } catch (e) {
+        document.getElementById('summary').textContent = 'Error: ' + e.message;
+        setRiskPill('Error');
+      }
+    }
+
+    async function loadLogs() {
+      try {
+        const res = await fetch(`${apiBase}/logs`);
+        const data = await res.json();
+        const table = document.getElementById('logTable');
+        table.innerHTML = '';
+        
+        document.getElementById('openMaintenance').textContent = data.logs.length;
+        
+        data.logs.forEach((log) => {
+          const info = assetInfo[log.assetId] || { name: log.assetId, icon: '📦' };
+          const time = new Date(log.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${time}</td><td>${info.icon} ${info.name}</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${log.note}</td>`;
+          table.appendChild(tr);
+        });
+      } catch (e) {
+        console.error('Failed to load logs:', e);
+      }
+    }
+
+    async function classifyNote() {
+      const note = document.getElementById('maintenanceNote').value;
+      if (!note) return alert('Please enter a maintenance note');
+      
+      document.getElementById('classification').innerHTML = '<div class="pill">Analyzing...</div>';
+      document.getElementById('classificationDetails').textContent = 'Processing with AI...';
+      
+      const startTime = performance.now();
+      try {
+        const res = await fetch(`${apiBase}/logs/classify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ note }),
+        });
+        const data = await res.json();
+        lastClassifyTime = Math.round(performance.now() - startTime);
+        updateTimingDisplay();
+        document.getElementById('classification').innerHTML = `<div class="pill ${data.priority?.toLowerCase()}">Priority: ${data.priority}</div><span style="margin-left: 12px; font-size: 12px; color: var(--accent);">⏱️ ${lastClassifyTime} ms</span>`;
+        document.getElementById('classificationDetails').textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        document.getElementById('classification').innerHTML = '<div class="pill high">Error</div>';
+        document.getElementById('classificationDetails').textContent = 'Error: ' + e.message;
+      }
+    }
+
+    function appendChat(message, role) {
+      const windowEl = document.getElementById('chatWindow');
+      const bubble = document.createElement('div');
+      bubble.className = `chat-bubble ${role}`;
+      bubble.textContent = message;
+      windowEl.appendChild(bubble);
+      windowEl.scrollTop = windowEl.scrollHeight;
+    }
+
+    let conversationId = localStorage.getItem('conversationId');
+
+    async function sendChat() {
+      const question = document.getElementById('chatInput').value;
+      const assetId = document.getElementById('chatAsset').value;
+      if (!question) return;
+      
+      appendChat(question, 'user');
+      document.getElementById('chatInput').value = '';
+      
+      const startTime = performance.now();
+      try {
+        const res = await fetch(`${apiBase}/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question, assetId: assetId || null, conversationId: conversationId || null }),
+        });
+        const data = await res.json();
+        lastChatTime = Math.round(performance.now() - startTime);
+        updateTimingDisplay();
+        if (data.conversationId) {
+          conversationId = data.conversationId;
+          localStorage.setItem('conversationId', conversationId);
+        }
+        appendChat(`${data.answer || 'No response received.'}\n\n⏱️ ${lastChatTime} ms`, 'bot');
+      } catch (e) {
+        appendChat('Error: ' + e.message, 'bot');
+      }
+    }
+
+    async function loadModelListing(path) {
+      document.getElementById('modelListing').textContent = 'Loading...';
+      try {
+        const res = await fetch(`${apiBase}${path}`);
+        const data = await res.json();
+        document.getElementById('modelListing').textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        document.getElementById('modelListing').textContent = 'Error: ' + e.message;
+      }
+    }
+
+    function applyScenario() {
+      document.getElementById('assetId').value = 'CNC-L2-M03';
+      document.getElementById('maintenanceNote').value = 'Grinding noise from hydraulic pump during startup sequence. Noise increases under load. Vibration sensor showing intermittent spikes above threshold.';
+      document.getElementById('chatAsset').value = 'CNC-L2-M03';
+      document.getElementById('chatInput').value = 'What caused the throughput drop on Line 2?';
+      
+      // Switch to assets tab
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelector('[data-tab="assets"]').classList.add('active');
+      document.getElementById('tab-assets').classList.add('active');
+    }
+
+    async function refreshConversations() {
+      try {
+        const res = await fetch(`${apiBase}/chat/conversations`);
+        const data = await res.json();
+        const select = document.getElementById('conversationSelect');
+        select.innerHTML = '<option value="">-- Select conversation --</option>';
+        data.conversations.forEach((conv) => {
+          const opt = document.createElement('option');
+          opt.value = conv.id;
+          const date = conv.lastMessageAt ? new Date(conv.lastMessageAt).toLocaleString() : 'Unknown';
+          opt.textContent = `${conv.id.slice(-8)} • ${conv.messageCount} msgs • ${date}`;
+          select.appendChild(opt);
+        });
+      } catch (e) {
+        console.error('Failed to load conversations:', e);
+      }
+    }
+
+    async function loadConversationHistory() {
+      const select = document.getElementById('conversationSelect');
+      if (!select.value) return;
+      try {
+        const res = await fetch(`${apiBase}/chat/history?conversationId=${encodeURIComponent(select.value)}`);
+        const data = await res.json();
+        document.getElementById('conversationHistory').textContent = JSON.stringify(data.history, null, 2);
+      } catch (e) {
+        document.getElementById('conversationHistory').textContent = 'Error: ' + e.message;
+      }
+    }
+
+    async function deleteConversation() {
+      const select = document.getElementById('conversationSelect');
+      if (!select.value) return;
+      if (!confirm('Delete this conversation?')) return;
+      try {
+        await fetch(`${apiBase}/chat/history/${encodeURIComponent(select.value)}`, { method: 'DELETE' });
+        await refreshConversations();
+        document.getElementById('conversationHistory').textContent = 'Conversation deleted.';
+      } catch (e) {
+        alert('Error: ' + e.message);
+      }
+    }
+
+    async function clearAllConversations() {
+      if (!confirm('Clear ALL conversation history? This cannot be undone.')) return;
+      try {
+        await fetch(`${apiBase}/chat/history`, { method: 'DELETE' });
+        await refreshConversations();
+        document.getElementById('conversationHistory').textContent = 'All conversations cleared.';
+      } catch (e) {
+        alert('Error: ' + e.message);
+      }
+    }
+
+    // Event listeners
+    document.getElementById('loadSummary').onclick = loadSummary;
+    document.getElementById('classifyNote').onclick = classifyNote;
+    document.getElementById('sendChat').onclick = sendChat;
+    document.getElementById('chatInput').onkeypress = (e) => { if (e.key === 'Enter') sendChat(); };
+    document.getElementById('loadCatalog').onclick = () => loadModelListing('/models/catalog');
+    document.getElementById('loadCached').onclick = () => loadModelListing('/models/cached');
+    document.getElementById('checkStatus').onclick = () => loadModelListing('/models/status');
+    document.getElementById('applyScenario').onclick = applyScenario;
+    document.getElementById('refreshConversations').onclick = refreshConversations;
+    document.getElementById('loadConversation').onclick = loadConversationHistory;
+    document.getElementById('deleteConversation').onclick = deleteConversation;
+    document.getElementById('clearAllConversations').onclick = clearAllConversations;
+    document.getElementById('applyModelConfig').onclick = applyModelConfig;
+    document.getElementById('refreshModelConfig').onclick = refreshModelConfig;
+    document.getElementById('runBenchmark').onclick = runBenchmark;
+
+    // Model configuration functions
+    async function refreshModelConfig() {
+      try {
+        const res = await fetch(`${apiBase}/models/config`);
+        const data = await res.json();
+        
+        // Show loaded model prominently
+        const loadedEl = document.getElementById('loadedModelDisplay');
+        if (data.loadedModel) {
+          loadedEl.textContent = '🟢 ' + data.loadedModel;
+          loadedEl.style.color = 'var(--accent-2)';
+        } else {
+          loadedEl.textContent = '⚪ No model loaded';
+          loadedEl.style.color = 'var(--warning)';
+        }
+        
+        // Set preference dropdown
+        if (data.selectedModel) {
+          document.getElementById('preferredModelSelect').value = data.selectedModel;
+        }
+        
+        document.getElementById('modelConfigStatus').textContent = 
+          'Loaded Model: ' + (data.loadedModel || 'none') + '\n' +
+          'Saved Preference: ' + (data.selectedModel || 'none') + '\n\n' +
+          (data.note || '');
+      } catch (e) {
+        document.getElementById('loadedModelDisplay').textContent = '🔴 Connection Error';
+        document.getElementById('loadedModelDisplay').style.color = 'var(--danger)';
+        document.getElementById('modelConfigStatus').textContent = 'Error: ' + e.message + '\n\nMake sure the server is running.';
+      }
+    }
+
+    async function applyModelConfig() {
+      const preferredModel = document.getElementById('preferredModelSelect').value;
+      try {
+        const res = await fetch(`${apiBase}/models/config`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ preferredModel }),
+        });
+        const data = await res.json();
+        document.getElementById('modelConfigStatus').textContent = 
+          '✓ Preference saved: ' + preferredModel + '\n\n' +
+          'To switch models, run:\n' +
+          '  foundry model run ' + preferredModel + '\n\n' +
+          'Then restart this application.';
+      } catch (e) {
+        document.getElementById('modelConfigStatus').textContent = 'Error: ' + e.message;
+      }
+    }
+
+    // Timing tracking
+    let lastClassifyTime = null;
+    let lastSummaryTime = null;
+    let lastChatTime = null;
+
+    function updateTimingDisplay() {
+      document.getElementById('lastClassifyTime').textContent = lastClassifyTime !== null ? `${lastClassifyTime} ms` : '-- ms';
+      document.getElementById('lastSummaryTime').textContent = lastSummaryTime !== null ? `${lastSummaryTime} ms` : '-- ms';
+      document.getElementById('lastChatTime').textContent = lastChatTime !== null ? `${lastChatTime} ms` : '-- ms';
+    }
+
+    async function runBenchmark() {
+      const resultsEl = document.getElementById('benchmarkResults');
+      resultsEl.textContent = 'Running benchmark...\n';
+      
+      // Get the currently loaded model
+      let loadedModel = 'unknown';
+      try {
+        const configRes = await fetch(`${apiBase}/models/config`);
+        const config = await configRes.json();
+        loadedModel = config.loadedModel || 'unknown';
+      } catch (e) {}
+      
+      resultsEl.textContent += `\nUsing Model: ${loadedModel}\n\n`;
+      
+      // Benchmark classification
+      resultsEl.textContent += '1. Classification... ';
+      const classifyStart = performance.now();
+      try {
+        await fetch(`${apiBase}/logs/classify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ note: 'Grinding noise from pump during startup' }),
+        });
+        lastClassifyTime = Math.round(performance.now() - classifyStart);
+        resultsEl.textContent += `${lastClassifyTime} ms done\n`;
+      } catch (e) {
+        resultsEl.textContent += `Failed: ${e.message}\n`;
+      }
+      
+      // Benchmark summary
+      resultsEl.textContent += '2. Summary... ';
+      const summaryStart = performance.now();
+      try {
+        await fetch(`${apiBase}/assets/PUMP-L1-H01/summary`);
+        lastSummaryTime = Math.round(performance.now() - summaryStart);
+        resultsEl.textContent += `${lastSummaryTime} ms done\n`;
+      } catch (e) {
+        resultsEl.textContent += `Failed: ${e.message}\n`;
+      }
+      
+      // Benchmark chat
+      resultsEl.textContent += '3. Chat... ';
+      const chatStart = performance.now();
+      try {
+        await fetch(`${apiBase}/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: 'What is the status of the hydraulic pump?', conversationId: 'benchmark' }),
+        });
+        lastChatTime = Math.round(performance.now() - chatStart);
+        resultsEl.textContent += `${lastChatTime} ms done\n`;
+      } catch (e) {
+        resultsEl.textContent += `Failed: ${e.message}\n`;
+      }
+      
+      updateTimingDisplay();
+      
+      resultsEl.textContent += `\n────────────────────────────
+RESULTS SUMMARY
+────────────────────────────
+Classification: ${lastClassifyTime || '--'} ms (${fastModel})
+Summary:        ${lastSummaryTime || '--'} ms (${qualityModel})
+Chat:           ${lastChatTime || '--'} ms (${qualityModel})
+────────────────────────────
+Total:          ${(lastClassifyTime || 0) + (lastSummaryTime || 0) + (lastChatTime || 0)} ms
+`;
+    }
+
+    // Example questions
+    document.querySelectorAll('.example-q').forEach(btn => {
+      btn.onclick = () => {
+        document.getElementById('chatInput').value = btn.dataset.q;
+        sendChat();
+      };
+    });
+
+    // Initialize
+    checkHealth();
+    loadLogs();
+    populateAssets();
+    refreshConversations();
+    refreshModelConfig();
+    setInterval(checkHealth, 30000);
+  </script>
+</body>
+</html>
