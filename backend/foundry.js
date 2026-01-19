@@ -9,7 +9,7 @@ let serviceUrl = null;  // Base URL without /v1
 
 async function findRunningService() {
   // Check common ports for Foundry Local service
-  const portsToTry = [DEFAULT_FOUNDRY_PORT, 53018, 8080];
+  const portsToTry = [DEFAULT_FOUNDRY_PORT, 53018, 8080, 49682, 5000, 5001];
   for (const port of portsToTry) {
     try {
       const res = await fetch(`http://127.0.0.1:${port}/openai/status`, { signal: AbortSignal.timeout(2000) });
