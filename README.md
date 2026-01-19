@@ -264,6 +264,14 @@ Foundry Local automatically selects GPU variants when available. For best perfor
 - **Intel GPU**: Uses OpenVINO acceleration  
 - **CPU only**: Uses optimized CPU inference (slower but works everywhere)
 
+## Screenshots 
+
+![PlantAssetOverview](./images/PlantAssetOverview.png)
+![AssetHealth](./images/AssetHealth.png)
+![Maintenance](./images/Maintenance.png)
+![AIAssitant](./images/AIAssistant.png)
+![System](./images/System.png)
+
 ## Scenario walkthrough
 **Scenario: Thermal Event on Assembly Line 2**
 
@@ -328,3 +336,4 @@ Use the **Admin: Conversation Manager** card in the UI to:
 cd backend
 npm test
 ```
+
