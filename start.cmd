@@ -51,6 +51,25 @@ if not exist "node_modules" (
     echo [OK] Dependencies already installed
 )
 
+REM Check and start Foundry Local service
+echo.
+echo Checking Foundry Local service...
+foundry service status | find "not running" >nul 2>&1
+if %ERRORLEVEL% equ 0 (
+    echo Starting Foundry Local service...
+    foundry service start
+    if %ERRORLEVEL% neq 0 (
+        echo [ERROR] Failed to start Foundry Local service
+        pause
+        exit /b 1
+    )
+    echo Waiting for service to initialize...
+    timeout /t 3 /nobreak >nul
+    echo [OK] Foundry Local service started
+) else (
+    echo [OK] Foundry Local service already running
+)
+
 REM Start the backend server in a new window
 echo.
 echo Starting backend server...

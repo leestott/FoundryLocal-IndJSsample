@@ -8,8 +8,31 @@ let loadedModelInfo = null;
 let serviceUrl = null;  // Base URL without /v1
 
 async function findRunningService() {
+  // First try to get the service URL from foundry CLI
+  try {
+    const { execSync } = require('child_process');
+    const output = execSync('foundry service status', { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'ignore'] });
+    
+    // Look for URL in output like: "Service is Started on http://127.0.0.1:54548/"
+    const urlMatch = output.match(/http:\/\/127\.0\.0\.1:\d+/);
+    if (urlMatch) {
+      const serviceUrl = urlMatch[0];
+      // Verify it's responding
+      try {
+        const res = await fetch(`${serviceUrl}/openai/status`, { signal: AbortSignal.timeout(2000) });
+        if (res.ok) {
+          return serviceUrl;
+        }
+      } catch {
+        // Service URL found but not responding yet
+      }
+    }
+  } catch {
+    // foundry CLI not available or command failed, fall back to port scanning
+  }
+  
   // Check common ports for Foundry Local service
-  const portsToTry = [DEFAULT_FOUNDRY_PORT, 53018, 8080, 49682, 5000, 5001];
+  const portsToTry = [DEFAULT_FOUNDRY_PORT, 53018, 8080, 49682, 5000, 5001, 54548, 54549];
   for (const port of portsToTry) {
     try {
       const res = await fetch(`http://127.0.0.1:${port}/openai/status`, { signal: AbortSignal.timeout(2000) });

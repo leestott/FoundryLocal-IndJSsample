@@ -171,9 +171,14 @@ app.post('/api/models/config', (req, res) => {
 async function startServer({ port = process.env.PORT || 3000, skipFoundryInit = false } = {}) {
   if (!skipFoundryInit) {
     const modelInfo = await initFoundry();
-    createClient();
-    if (modelInfo && modelInfo.id) {
-      setModelId(modelInfo.id);
+    try {
+      createClient();
+      if (modelInfo && modelInfo.id) {
+        setModelId(modelInfo.id);
+      }
+    } catch (clientErr) {
+      console.error('Failed to create AI client:', clientErr.message);
+      // Continue anyway - client will be created on first request
     }
   }
   return new Promise((resolve, reject) => {
@@ -195,6 +200,17 @@ if (require.main === module) {
   startServer({ skipFoundryInit: false }).catch((err) => {
     console.error('Server failed to start:', err.message);
     process.exit(1);
+  });
+  
+  // Keep process alive and handle graceful shutdown
+  process.on('SIGINT', () => {
+    console.log('\nShutting down server...');
+    process.exit(0);
+  });
+  
+  process.on('SIGTERM', () => {
+    console.log('\nShutting down server...');
+    process.exit(0);
   });
 }
 

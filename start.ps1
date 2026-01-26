@@ -58,6 +58,25 @@ else {
     Write-Host "[OK] Dependencies already installed" -ForegroundColor Green
 }
 
+# Check and start Foundry Local service
+Write-Host ""
+Write-Host "Checking Foundry Local service..." -ForegroundColor Yellow
+$serviceStatus = foundry service status 2>&1
+if ($serviceStatus -match "not running") {
+    Write-Host "Starting Foundry Local service..." -ForegroundColor Yellow
+    foundry service start
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "[ERROR] Failed to start Foundry Local service" -ForegroundColor Red
+        exit 1
+    }
+    Write-Host "Waiting for service to initialize..." -ForegroundColor Yellow
+    Start-Sleep -Seconds 3
+    Write-Host "[OK] Foundry Local service started" -ForegroundColor Green
+}
+else {
+    Write-Host "[OK] Foundry Local service already running" -ForegroundColor Green
+}
+
 # Start the backend server in a new window
 Write-Host ""
 Write-Host "Starting backend server..." -ForegroundColor Yellow

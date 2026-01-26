@@ -164,6 +164,15 @@ cd /d C:\path\to\FoundryLocal-IndJSsample\backend && npm install && start cmd /k
 Get-NetTCPConnection -LocalPort 3000 | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }
 ```
 
+**"Foundry Local service not running"**
+```powershell
+# Start the Foundry Local service
+foundry service start
+
+# Check service status
+foundry service status
+```
+
 **"Foundry Local not found"**
 ```powershell
 # Install Foundry Local
